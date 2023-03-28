@@ -1,0 +1,111 @@
+﻿@{
+    ViewData["Title"] = "CentralizeBillingView";
+}
+
+<body>
+    <div class="text-center">
+        <h1 class="display-4">Centralize Billing Mockup</h1>
+    </div>
+
+    <form>
+        <div class="display-1">
+            <h4>Order Summary</h4>
+        </div>
+
+        <div class="form-group row">
+            <label for="reference_order" class="col-sm-2 col-form-label">Reference Order : </label>
+            <div class="col-sm-7">
+                <input type="text" readonly class="form-control" id=inputReference_order value="@ViewData["Reference_order"]">
+
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="total_amount" class="col-sm-2 col-form-label">Total Amount : </label>
+            <div class="col-sm-7">
+                <input type="text" readonly class="form-control" id="inputTotal_amount" value="@ViewData["Total_amount"]">
+            </div>
+        </div>
+    </form>
+
+    <form>
+        <div class="display-1">
+            <h4>Payment Method</h4>
+        </div>
+
+        <div class="form-group row justify-content-center">
+            <div class="col-sm-8 row">
+                <input type="radio" id="5" name="contact" value="Kplus" onclick="save(this.id)" />
+                <label for="5">K Plus</label>
+            </div>
+
+            <div class="col-sm-8 row">
+                <input type="radio" id="1" name="contact" value="ThaiQR" onclick="save(this.id)" />
+                <label for="1">Thai QR Payment</label>
+            </div>
+
+            <div class="col-sm-8 row">
+                <input type="radio" id="2" name="contact" value="CreditCard" onclick="save(this.id)" />
+                <label for="2">บัตรเครดิต แบบเต็มจำนวน</label>
+            </div>
+
+            <div class="col-sm-8 row">
+                <input type="radio" id="7" name="contact" value="CreditCardInstallment" onclick="save(this.id)" />
+                <label for="7">บัตรเครดิต แบบผ่อนชำระ</label>
+            </div>
+        </div>
+    </form>
+
+    <div class=" text-center" id="inputSubmit" style="margin: 10px; ">
+        <input type="button" class="col-sm-2" value="Success" id="Success" onclick="saveOnClick(this.id)">
+        <input type="button" class="col-sm-2" value="Created" id="Created" onclick="saveOnClick(this.id)">
+        <input type="button" class="col-sm-2" value="Pending" id="Pending" onclick="saveOnClick(this.id)">
+    </div>
+
+    <div class=" text-center" id="inputSubmitFail" style="margin: 10px;">
+        <input type="button" class="col-sm-auto" value="Fail CTB NewTransaction" id="FailCTBNewTransaction" onclick="saveOnClick(this.id)">
+        <input type="button" class="col-sm-auto" value="Fail CTB BankSystemError " id="FailCTBBankSystemError" onclick="saveOnClick(this.id)">
+        <input type="button" class="col-sm-auto" value="Fail CTB ContactBank" id="FailCTBContactBank" onclick="saveOnClick(this.id)">
+    </div>
+    <div class=" text-center" id="inputSubmitFail" style="margin: 10px;">
+        <input type="button" class="col-sm-auto" value="Cancel Centralize Billing" id="CancelPayment" onclick="cancelCTBPayment()">
+    </div>
+</body>
+<script type="text/javascript">
+    let paymentData
+    save = function (el) {
+        paymentData = el
+        return paymentData;
+    }
+    saveOnClick = function (el) {
+        if (paymentData == null) {
+            alert("โปรดเลือกช่องทางการชำระเงิน");
+            return
+        }
+
+        let formData = {
+            reference_order: $("#inputReference_order").val(),
+            payment_method_id: paymentData,
+            status: el
+        }
+        var settings = {
+            "async": true,
+            "url": 'http://localhost/paymentSuccess',
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json",
+                "cache-control": "no-cache"
+            },
+            "data": JSON.stringify(formData)
+        }
+        $.ajax(settings).done(function (response) {
+            alert("คลิ๊ก Ok เพื่อดำเนินการต่อ");
+            window.location = ("http://localhost/paymentSuccess" + "?invoice_no_mock=" + $("#inputReference_order").val() + "&status=success");
+        }).fail(function (response, status) {
+            alert("โปรดติดต่อผู้ดูแลระบบ");
+        });
+    }
+    cancelCTBPayment = function () {
+        location.href = "http://localhost/paymentSuccess" + "?invoice_no_mock=" + $("#inputReference_order").val() + "&status=fail";
+    }
+</script>
